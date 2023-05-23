@@ -1,3 +1,0 @@
-[submodule "pupil"]
-	path = src/eye_tracker/pupil
-	url = https://github.com/pupil-labs/pupil.git
