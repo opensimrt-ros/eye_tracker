@@ -39,9 +39,10 @@ while not rospy.is_shutdown():
     scene_image_rgb = cv2.cvtColor(scene_sample.bgr_pixels, cv2.COLOR_BGR2RGB)
     try:
         #image_message = bridge.cv2_to_imgmsg(scene_image_rgb, "passthrough")
-        image_message = bridge.cv2_to_imgmsg(scene_sample, "passthrough")
+        image_message = bridge.cv2_to_imgmsg(scene_sample.bgr_pixels, "passthrough")
     except CvBridgeError as e:
         print(e)
+        break
     image_pub.publish(image_message)
     stop = time.time()
     print(stop-start)
