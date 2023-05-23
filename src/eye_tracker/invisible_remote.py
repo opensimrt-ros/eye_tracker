@@ -28,24 +28,39 @@ rospy.init_node("eye")
 
 bridge = CvBridge()
 image_pub = rospy.Publisher("image_topic", Image)
+image_overlay_pub = rospy.Publisher("image_overlay_topic", Image)
 #dt_gaze = datetime.fromtimestamp(gaze_sample.timestamp_unix_seconds)
 #dt_scene = datetime.fromtimestamp(scene_sample.timestamp_unix_seconds)
 #print(f"This gaze sample was recorded at {dt_gaze}")
 #print(f"This scene video was recorded at {dt_scene}")
 #print(f"Temporal difference between both is {abs(gaze_sample.timestamp_unix_seconds - scene_sample.timestamp_unix_seconds) * 1000:.1f} ms")
+from sys import exit
+print("use ctrl-z to quit")
 while not rospy.is_shutdown():
-    start = time.time()
-    scene_sample, gaze_sample = device.receive_matched_scene_video_frame_and_gaze()
-    scene_image_rgb = cv2.cvtColor(scene_sample.bgr_pixels, cv2.COLOR_BGR2RGB)
     try:
-        #image_message = bridge.cv2_to_imgmsg(scene_image_rgb, "passthrough")
-        image_message = bridge.cv2_to_imgmsg(scene_sample.bgr_pixels, "passthrough")
-    except CvBridgeError as e:
-        print(e)
-        break
-    image_pub.publish(image_message)
-    stop = time.time()
-    print(stop-start)
+        #start = time.time()
+        scene_sample, gaze_sample = device.receive_matched_scene_video_frame_and_gaze()
+        #scene_image_rgb = cv2.cvtColor(scene_sample.bgr_pixels, cv2.COLOR_BGR2RGB)
+        try:
+            #image_message = bridge.cv2_to_imgmsg(scene_image_rgb, "passthrough")
+            image_message = bridge.cv2_to_imgmsg(scene_sample.bgr_pixels, "passthrough")
+        except CvBridgeError as e:
+            print(e)
+            break
+        image_pub.publish(image_message)
+        image = cv2.circle(scene_sample.bgr_pixels, (int(gaze_sample.x), int(gaze_sample.y)), 20, (0,0,255), 4)
+        try:
+            #image_message = bridge.cv2_to_imgmsg(scene_image_rgb, "passthrough")
+            image_message = bridge.cv2_to_imgmsg(image, "passthrough")
+        except CvBridgeError as e:
+            print(e)
+            break
+        image_overlay_pub.publish(image_message)
+        
+        #stop = time.time()
+        #print(stop-start)
+    except KeyboardInterrupt:
+        exit()
     #cv2.imshow("preview", scene_image_rgb)
 #plt.figure(figsize=(10, 10))
 #plt.imshow(scene_image_rgb)
