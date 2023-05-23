@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<launch>
+
+	<arg name="thread_freq" default="100" />
+	<arg name="phone_ip" default="192.168.1.101" />
+	<arg name="phone_port" default="8080" />
+	<arg name="gaze_size" default="20" />
+
+	<node pkg="eye_tracker" type="invisible_remote.py" 	name="pupil" output="screen">
+		<param name="thread_frw" 		value="$(arg thread_freq)" />
+		<param name="phone_ip" 			value="$(arg phone_ip)"/>
+		<param name="phone_port" 		value="$(arg phone_port)"/>
+		<param name="gaze_size" 		value="$(arg gaze_size)"/>
+		<param name="publish_overlay" 		value="true"/>
+		<remap from="image_topic" 		to="/eye_tracker/image"/>
+		<remap from="image_overlay_topic" 	to="/eye_tracker/image_overlay"/>
+	</node>
+
+
+</launch>
+
+

@@ -13,7 +13,13 @@ rospy.init_node("eye")
 
 nest_asyncio.apply()
 #TODO: params? maybe someone wants to know this. 
-device = Device(address="192.168.1.101", port="8080")
+phone_ip =rospy.get_param("~phone_ip", "192.168.1.101")
+phone_port =rospy.get_param("~phone_port", "8080")
+freq =rospy.get_param("~thread_freq", "60")
+gaze_size =rospy.get_param("~gaze_size", 20)
+publish_overlay =rospy.get_param("~publish_overlay", True)
+
+device = Device(address=phone_ip, port=phone_port)
 
 print(f"Phone IP address: {device.phone_ip}")
 print(f"Phone name: {device.phone_name}")
@@ -23,11 +29,11 @@ print(f"Serial number of connected glasses: {device.serial_number_glasses}")
 
 bridge = CvBridge()
 image_pub = rospy.Publisher("image_topic", Image, queue_size=1)
-image_overlay_pub = rospy.Publisher("image_overlay_topic", Image, queue_size=1)
+if publish_overlay:
+    image_overlay_pub = rospy.Publisher("image_overlay_topic", Image, queue_size=1)
 gaze_pub = rospy.Publisher("gaze", RegionOfInterest, queue_size=1)
-gaze_size = 20
 
-rate = rospy.Rate(60)
+rate = rospy.Rate(freq)
 
 #TODO: node is not shutting down as expected. 
 print("use ctrl-z to quit")
@@ -41,13 +47,14 @@ while not rospy.is_shutdown():
             print(e)
             break
         image_pub.publish(image_message)
-        image = cv2.circle(scene_sample.bgr_pixels, (int(gaze_sample.x), int(gaze_sample.y)), gaze_size, (0,0,255), 4)
-        try:
-            image_message = bridge.cv2_to_imgmsg(image, "passthrough")
-        except CvBridgeError as e:
-            print(e)
-            break
-        image_overlay_pub.publish(image_message)
+        if publish_overlay:
+            image = cv2.circle(scene_sample.bgr_pixels, (int(gaze_sample.x), int(gaze_sample.y)), gaze_size, (0,0,255), 4)
+            try:
+                image_message = bridge.cv2_to_imgmsg(image, "passthrough")
+            except CvBridgeError as e:
+                print(e)
+                break
+            image_overlay_pub.publish(image_message)
         gaze_msg = RegionOfInterest()
         gaze_msg.x_offset = gaze_sample.x - gaze_size/2
         gaze_msg.y_offset = gaze_sample.y - gaze_size/2
