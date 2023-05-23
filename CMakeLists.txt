@@ -8,7 +8,7 @@ project(eye_tracker)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  cv2
+  cv_bridge
   rospy
 )
 
@@ -104,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES eye_tracker
-#  CATKIN_DEPENDS cv2 rospy
+#  CATKIN_DEPENDS cv_bridge rospy
 #  DEPENDS system_lib
 )
 
